@@ -30,6 +30,28 @@ module Hornetseye
 
     end
 
+    alias_method :orig_write, :write
+
+    def write( frame )
+      if frame.typecode != SINT
+        raise "Audio data must be of type SINT (but was #{frame.typecode})"
+      end
+      if frame.dimension != 2
+        raise "Audio frame must have two dimensions (but had #{frame.dimension})"
+      end
+      if frame.shape.first != channels
+        raise "Audio frame must have #{channels} channel(s) but had " +
+              "#{frame.shape.first}"
+      end
+      orig_write Sequence( UBYTE, 2 * frame.size ).new( frame.memory )
+    end
+
+    alias_method :orig_wait, :wait
+
+    def wait( time = 1 )
+      orig_wait ( time * 1000 ).to_i
+    end
+
   end
 
 end
