@@ -116,7 +116,6 @@ begin
     s.rdoc_options = %w{--no-private}
     s.add_dependency %<malloc>, [ '~> 1.2' ]
     s.add_dependency %<multiarray>, [ '~> 0.11' ]
-    s.add_dependency %<hornetseye-frame>, [ '~> 0.7' ]
     s.add_development_dependency %q{rake}
   end
   GEM_SOURCE = "#{PKG_NAME}-#{PKG_VERSION}.gem"
