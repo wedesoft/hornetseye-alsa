@@ -13,26 +13,27 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-#include "alsaoutput.hh"
+#ifndef SEQUENCE_HH
+#define SEQUENCE_HH
 
-#ifdef WIN32
-#define DLLEXPORT __declspec(dllexport)
-#define DLLLOCAL
-#else
-#define DLLEXPORT __attribute__ ((visibility("default")))
-#define DLLLOCAL __attribute__ ((visibility("hidden")))
+#include <boost/smart_ptr.hpp>
+#include "rubyinc.hh"
+#include <string>
+
+class Sequence
+{
+public:
+  Sequence( int size );
+  Sequence( VALUE rbSequence ): m_sequence( rbSequence ) {}
+  virtual ~Sequence(void) {}
+  int size(void);
+  char *data(void);
+  VALUE rubyObject(void) { return m_sequence; }
+  void markRubyMember(void);
+protected:
+  VALUE m_sequence;
+};
+
+typedef boost::shared_ptr< Sequence > SequencePtr;
+
 #endif
-
-extern "C" DLLEXPORT void Init_hornetseye_alsa(void);
-
-extern "C" {
-
-  void Init_hornetseye_alsa(void)
-  {
-    rb_require( "multiarray" );
-    VALUE rbHornetseye = rb_define_module( "Hornetseye" );
-    AlsaOutput::registerRubyClass( rbHornetseye );
-    rb_require( "hornetseye_alsa_ext.rb" );
-  }
-
-}

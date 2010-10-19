@@ -13,5 +13,23 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-require 'hornetseye-alsa/alsaoutput'
+
+# Namespace of Hornetseye computer vision library
+module Hornetseye
+
+  class AlsaOutput
+
+    class << self
+
+      alias_method :orig_new, :new
+
+      def new( pcm_name = 'default:0' )
+        orig_new pcm_name
+      end
+
+    end
+
+  end
+
+end
 
