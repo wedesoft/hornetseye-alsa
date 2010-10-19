@@ -51,7 +51,6 @@ public:
   static VALUE wrapRate( VALUE rbSelf );
   static VALUE wrapChannels( VALUE rbSelf );
   static VALUE wrapFrames( VALUE rbSelf );
-  static VALUE wrapAvail( VALUE rbSelf );
   static VALUE wrapAvailUpdate( VALUE rbSelf );
   static VALUE wrapDelay( VALUE rbSelf );
   static VALUE wrapPrepare( VALUE rbSelf );
