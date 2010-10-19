@@ -35,8 +35,9 @@ public:
   void drain(void) throw (Error);
   unsigned int rate(void);
   unsigned int channels(void);
+  unsigned int frames(void);
   int availUpdate(void) throw (Error);
-  void wait( int milliSeconds ) throw (Error);
+  int delay(void) throw (Error);
   void prepare(void) throw (Error);
   static VALUE cRubyClass;
   static VALUE registerRubyClass( VALUE rbModule );
@@ -49,14 +50,17 @@ public:
   static VALUE wrapDrain( VALUE rbSelf );
   static VALUE wrapRate( VALUE rbSelf );
   static VALUE wrapChannels( VALUE rbSelf );
+  static VALUE wrapFrames( VALUE rbSelf );
+  static VALUE wrapAvail( VALUE rbSelf );
   static VALUE wrapAvailUpdate( VALUE rbSelf );
-  static VALUE wrapWait( VALUE rbSelf, VALUE rbMilliSeconds );
+  static VALUE wrapDelay( VALUE rbSelf );
   static VALUE wrapPrepare( VALUE rbSelf );
 protected:
   snd_pcm_t *m_pcmHandle;
   std::string m_pcmName;
   unsigned int m_rate;
   unsigned int m_channels;
+  snd_pcm_uframes_t m_frames;
 };
 
 typedef boost::shared_ptr< AlsaOutput > AlsaOutputPtr;

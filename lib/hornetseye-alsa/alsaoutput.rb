@@ -46,12 +46,6 @@ module Hornetseye
       orig_write Sequence( UBYTE, 2 * frame.size ).new( frame.memory )
     end
 
-    alias_method :orig_wait, :wait
-
-    def wait( time = 1 )
-      orig_wait ( time * 1000 ).to_i
-    end
-
   end
 
 end
