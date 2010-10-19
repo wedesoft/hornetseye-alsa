@@ -24,8 +24,8 @@ module Hornetseye
       alias_method :orig_new, :new
 
       def new( pcm_name = 'default:0', rate = 48000, channels = 2, periods = 2,
-               period_size = 4096 )
-        orig_new pcm_name, rate, channels, periods, period_size
+               frames = 1024 )
+        orig_new pcm_name, rate, channels, periods, frames
       end
 
     end

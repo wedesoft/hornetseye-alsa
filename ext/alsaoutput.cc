@@ -20,7 +20,8 @@ using namespace std;
 VALUE AlsaOutput::cRubyClass = Qnil;
 
 AlsaOutput::AlsaOutput( const string &pcmName, unsigned int rate,
-                        int channels, int periods, int periodSize ) throw (Error):
+                        unsigned int channels, int periods,
+                        int frames ) throw (Error):
   m_pcmHandle(NULL), m_pcmName( pcmName ), m_rate( rate )
 {
   try {
@@ -50,7 +51,7 @@ AlsaOutput::AlsaOutput( const string &pcmName, unsigned int rate,
     err = snd_pcm_hw_params_set_periods( m_pcmHandle, hwParams, periods, 0 );
     ERRORMACRO( err >= 0, Error, , "Error setting number of periods of PCM device \""
                 << m_pcmName << "\" to " << periods << ": " << snd_strerror( err ) );
-    snd_pcm_uframes_t bufSize = periodSize * periods / (channels * 2 );
+    snd_pcm_uframes_t bufSize = frames;
     err = snd_pcm_hw_params_set_buffer_size_near( m_pcmHandle, hwParams, &bufSize );
     ERRORMACRO( err >= 0, Error, , "Error setting buffer size of PCM device \""
                 << m_pcmName << "\" to " << bufSize << " frames: "
@@ -72,6 +73,7 @@ AlsaOutput::~AlsaOutput(void)
 void AlsaOutput::close(void)
 {
   if ( m_pcmHandle != NULL ) {
+    drop();
     snd_pcm_close( m_pcmHandle );
     m_pcmHandle = NULL;
   };
@@ -81,9 +83,34 @@ void AlsaOutput::write( SequencePtr frame ) throw (Error)
 {
 }
 
+void AlsaOutput::drop(void) throw (Error)
+{
+  ERRORMACRO( m_pcmHandle != NULL, Error, , "ALSA device \"" << m_pcmName
+              << "\" is not open. Did you call \"close\" before?" );
+  snd_pcm_drop( m_pcmHandle );
+}
+
+void AlsaOutput::drain(void) throw (Error)
+{
+  ERRORMACRO( m_pcmHandle != NULL, Error, , "ALSA device \"" << m_pcmName
+              << "\" is not open. Did you call \"close\" before?" );
+  snd_pcm_drain( m_pcmHandle );
+}
+
 unsigned int AlsaOutput::rate(void)
 {
   return m_rate;
+}
+
+int AlsaOutput::availUpdate(void) throw (Error)
+{
+  ERRORMACRO( m_pcmHandle != NULL, Error, , "ALSA device \"" << m_pcmName
+              << "\" is not open. Did you call \"close\" before?" );
+  snd_pcm_sframes_t frames = snd_pcm_avail_update( m_pcmHandle );
+  ERRORMACRO( frames >= 0, Error, , "Error querying number of available frames for "
+              "update of PCM device \"" << m_pcmName << "\": "
+              << snd_strerror( frames ) );
+  return frames;
 }
 
 VALUE AlsaOutput::registerRubyClass( VALUE rbModule )
@@ -93,7 +120,11 @@ VALUE AlsaOutput::registerRubyClass( VALUE rbModule )
                               RUBY_METHOD_FUNC( wrapNew ), 5 );
   rb_define_method( cRubyClass, "close", RUBY_METHOD_FUNC( wrapClose ), 0 );
   rb_define_method( cRubyClass, "write", RUBY_METHOD_FUNC( wrapWrite ), 1 );
+  rb_define_method( cRubyClass, "drop", RUBY_METHOD_FUNC( wrapDrop ), 0 );
+  rb_define_method( cRubyClass, "drain", RUBY_METHOD_FUNC( wrapDrain ), 0 );
   rb_define_method( cRubyClass, "rate", RUBY_METHOD_FUNC( wrapRate ), 0 );
+  rb_define_method( cRubyClass, "avail_update",
+                    RUBY_METHOD_FUNC( wrapAvailUpdate ), 0 );
 }
 
 void AlsaOutput::deleteRubyObject( void *ptr )
@@ -102,15 +133,14 @@ void AlsaOutput::deleteRubyObject( void *ptr )
 }
 
 VALUE AlsaOutput::wrapNew( VALUE rbClass, VALUE rbPCMName, VALUE rbRate,
-                           VALUE rbChannels, VALUE rbPeriods, VALUE rbPeriodSize )
+                           VALUE rbChannels, VALUE rbPeriods, VALUE rbFrames )
 {
   VALUE retVal = Qnil;
   try {
     rb_check_type( rbPCMName, T_STRING );
     AlsaOutputPtr ptr( new AlsaOutput( StringValuePtr( rbPCMName ),
-                                       NUM2UINT( rbRate ), NUM2INT( rbChannels ),
-                                       NUM2INT( rbPeriods ),
-                                       NUM2INT( rbPeriodSize ) ) );
+                                       NUM2UINT( rbRate ), NUM2UINT( rbChannels ),
+                                       NUM2INT( rbPeriods ), NUM2INT( rbFrames ) ) );
     retVal = Data_Wrap_Struct( rbClass, 0, deleteRubyObject,
                                new AlsaOutputPtr( ptr ) );
   } catch ( exception &e ) {
@@ -138,9 +168,43 @@ VALUE AlsaOutput::wrapWrite( VALUE rbSelf, VALUE rbSequence )
   return rbSequence;
 }
 
+VALUE AlsaOutput::wrapDrop( VALUE rbSelf )
+{
+  try {
+    AlsaOutputPtr *self; Data_Get_Struct( rbSelf, AlsaOutputPtr, self );
+    (*self)->drop();
+  } catch ( exception &e ) {
+    rb_raise( rb_eRuntimeError, "%s", e.what() );
+  };
+  return rbSelf;
+}
+
+VALUE AlsaOutput::wrapDrain( VALUE rbSelf )
+{
+  try {
+    AlsaOutputPtr *self; Data_Get_Struct( rbSelf, AlsaOutputPtr, self );
+    (*self)->drain();
+  } catch ( exception &e ) {
+    rb_raise( rb_eRuntimeError, "%s", e.what() );
+  };
+  return rbSelf;
+}
+
 VALUE AlsaOutput::wrapRate( VALUE rbSelf )
 {
   AlsaOutputPtr *self; Data_Get_Struct( rbSelf, AlsaOutputPtr, self );
   return UINT2NUM( (*self)->rate() );
+}
+
+VALUE AlsaOutput::wrapAvailUpdate( VALUE rbSelf )
+{
+  VALUE rbRetVal = Qnil;
+  try {
+    AlsaOutputPtr *self; Data_Get_Struct( rbSelf, AlsaOutputPtr, self );
+    rbRetVal = INT2NUM( (*self)->availUpdate() );
+  } catch ( exception &e ) {
+    rb_raise( rb_eRuntimeError, "%s", e.what() );
+  };
+  return rbRetVal;
 }
 

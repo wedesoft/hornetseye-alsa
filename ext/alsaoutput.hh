@@ -26,20 +26,26 @@ class AlsaOutput
 {
 public:
   AlsaOutput( const std::string &pcmName = "default:0",
-              unsigned int rate = 48000, int channels = 2,
-              int periods = 2, int periodSize = 4096 ) throw (Error);
+              unsigned int rate = 48000, unsigned int channels = 2,
+              int periods = 2, int frames = 1024 ) throw (Error);
   virtual ~AlsaOutput(void);
   void close(void);
   void write( SequencePtr sequence ) throw (Error);
+  void drop(void) throw (Error);
+  void drain(void) throw (Error);
   unsigned int rate(void);
+  int availUpdate(void) throw (Error);
   static VALUE cRubyClass;
   static VALUE registerRubyClass( VALUE rbModule );
   static void deleteRubyObject( void *ptr );
   static VALUE wrapNew( VALUE rbClass, VALUE rbPCMName, VALUE rbRate,
-                        VALUE rbChannels, VALUE rbPeriods, VALUE rbPeriodSize );
+                        VALUE rbChannels, VALUE rbPeriods, VALUE rbFrames );
   static VALUE wrapClose( VALUE rbSelf );
   static VALUE wrapWrite( VALUE rbSelf, VALUE rbSequence );
+  static VALUE wrapDrop( VALUE rbSelf );
+  static VALUE wrapDrain( VALUE rbSelf );
   static VALUE wrapRate( VALUE rbSelf );
+  static VALUE wrapAvailUpdate( VALUE rbSelf );
 protected:
   snd_pcm_t *m_pcmHandle;
   std::string m_pcmName;
