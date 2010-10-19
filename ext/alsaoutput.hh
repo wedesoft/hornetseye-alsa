@@ -25,19 +25,25 @@
 class AlsaOutput
 {
 public:
-  AlsaOutput( const std::string &pcmName = "default:0" ) throw (Error);
+  AlsaOutput( const std::string &pcmName = "default:0",
+              unsigned int rate = 48000, int channels = 2,
+              int periods = 2, int periodSize = 4096 ) throw (Error);
   virtual ~AlsaOutput(void);
   void close(void);
   void write( SequencePtr sequence ) throw (Error);
+  unsigned int rate(void);
   static VALUE cRubyClass;
   static VALUE registerRubyClass( VALUE rbModule );
   static void deleteRubyObject( void *ptr );
-  static VALUE wrapNew( VALUE rbClass, VALUE rbPCMName );
+  static VALUE wrapNew( VALUE rbClass, VALUE rbPCMName, VALUE rbRate,
+                        VALUE rbChannels, VALUE rbPeriods, VALUE rbPeriodSize );
   static VALUE wrapClose( VALUE rbSelf );
   static VALUE wrapWrite( VALUE rbSelf, VALUE rbSequence );
+  static VALUE wrapRate( VALUE rbSelf );
 protected:
   snd_pcm_t *m_pcmHandle;
   std::string m_pcmName;
+  unsigned int m_rate;
 };
 
 typedef boost::shared_ptr< AlsaOutput > AlsaOutputPtr;
