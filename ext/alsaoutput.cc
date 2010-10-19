@@ -118,11 +118,11 @@ unsigned int AlsaOutput::frames(void)
   return m_frames;
 }
 
-int AlsaOutput::availUpdate(void) throw (Error)
+int AlsaOutput::avail(void) throw (Error)
 {
   ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
               << "\" is not open. Did you call \"close\" before?" );
-  snd_pcm_sframes_t frames = snd_pcm_avail_update( m_pcmHandle );
+  snd_pcm_sframes_t frames = snd_pcm_avail( m_pcmHandle );
   ERRORMACRO( frames >= 0, Error, , "Error querying number of available frames for "
               "update of PCM device \"" << m_pcmName << "\": "
               << snd_strerror( frames ) );
@@ -162,8 +162,7 @@ VALUE AlsaOutput::registerRubyClass( VALUE rbModule )
   rb_define_method( cRubyClass, "rate", RUBY_METHOD_FUNC( wrapRate ), 0 );
   rb_define_method( cRubyClass, "channels", RUBY_METHOD_FUNC( wrapChannels ), 0 );
   rb_define_method( cRubyClass, "frames", RUBY_METHOD_FUNC( wrapFrames ), 0 );
-  rb_define_method( cRubyClass, "avail_update",
-                    RUBY_METHOD_FUNC( wrapAvailUpdate ), 0 );
+  rb_define_method( cRubyClass, "avail", RUBY_METHOD_FUNC( wrapAvail ), 0 );
   rb_define_method( cRubyClass, "delay", RUBY_METHOD_FUNC( wrapDelay ), 0 );
   rb_define_method( cRubyClass, "prepare", RUBY_METHOD_FUNC( wrapPrepare ), 0 );
 }
@@ -249,12 +248,12 @@ VALUE AlsaOutput::wrapFrames( VALUE rbSelf )
   return UINT2NUM( (*self)->frames() );
 }
 
-VALUE AlsaOutput::wrapAvailUpdate( VALUE rbSelf )
+VALUE AlsaOutput::wrapAvail( VALUE rbSelf )
 {
   VALUE rbRetVal = Qnil;
   try {
     AlsaOutputPtr *self; Data_Get_Struct( rbSelf, AlsaOutputPtr, self );
-    rbRetVal = INT2NUM( (*self)->availUpdate() );
+    rbRetVal = INT2NUM( (*self)->avail() );
   } catch ( exception &e ) {
     rb_raise( rb_eRuntimeError, "%s", e.what() );
   };

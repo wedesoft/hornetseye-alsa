@@ -36,7 +36,7 @@ public:
   unsigned int rate(void);
   unsigned int channels(void);
   unsigned int frames(void);
-  int availUpdate(void) throw (Error);
+  int avail(void) throw (Error);
   int delay(void) throw (Error);
   void prepare(void) throw (Error);
   static VALUE cRubyClass;
@@ -51,7 +51,7 @@ public:
   static VALUE wrapRate( VALUE rbSelf );
   static VALUE wrapChannels( VALUE rbSelf );
   static VALUE wrapFrames( VALUE rbSelf );
-  static VALUE wrapAvailUpdate( VALUE rbSelf );
+  static VALUE wrapAvail( VALUE rbSelf );
   static VALUE wrapDelay( VALUE rbSelf );
   static VALUE wrapPrepare( VALUE rbSelf );
 protected:
