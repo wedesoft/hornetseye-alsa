@@ -83,10 +83,16 @@ void AlsaOutput::write( SequencePtr frame ) throw (Error)
 {
   ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
               << "\" is not open. Did you call \"close\" before?" );
-  int err = snd_pcm_writei( m_pcmHandle, (short int *)frame->data(),
-                            frame->size() / ( 2 * m_channels ) );
-  ERRORMACRO( err >= 0, Error, , "Error writing audio frames to PCM device \""
-              << m_pcmName << "\": " << snd_strerror( err ) );
+  int n = frame->size() / ( 2 * m_channels );
+  int err;
+  while ( ( err = snd_pcm_writei( m_pcmHandle, (short int *)frame->data(),
+                                  n ) ) < 0 ) {
+    err = snd_pcm_recover( m_pcmHandle, err, 1 );
+    ERRORMACRO( err >= 0, Error, , "Error writing audio frames to PCM device \""
+                << m_pcmName << "\": " << snd_strerror( err ) );
+  };
+  ERRORMACRO( n == err, Error, , "Only managed to write " << err << " of " << n
+              << " frames to PCM device \"" << m_pcmName << "\"" ); 
 }
 
 void AlsaOutput::drop(void) throw (Error)
@@ -122,10 +128,14 @@ int AlsaOutput::avail(void) throw (Error)
 {
   ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
               << "\" is not open. Did you call \"close\" before?" );
-  snd_pcm_sframes_t frames = snd_pcm_avail( m_pcmHandle );
-  ERRORMACRO( frames >= 0, Error, , "Error querying number of available frames for "
+  snd_pcm_sframes_t frames;
+  int err = 0;
+  while ( ( frames = snd_pcm_avail( m_pcmHandle ) ) < 0 ) {
+    err = snd_pcm_recover( m_pcmHandle, frames, 1 );
+    ERRORMACRO( err >= 0, Error, , "Error querying number of available frames for "
               "update of PCM device \"" << m_pcmName << "\": "
-              << snd_strerror( frames ) );
+              << snd_strerror( err ) );
+  };
   return frames;
 }
 
@@ -134,10 +144,13 @@ int AlsaOutput::delay(void) throw (Error)
   ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
               << "\" is not open. Did you call \"close\" before?" );
   snd_pcm_sframes_t frames;
-  int err = snd_pcm_delay( m_pcmHandle, &frames );
-  ERRORMACRO( err >= 0, Error, , "Error querying number of available frames for "
-              "update of PCM device \"" << m_pcmName << "\": "
-              << snd_strerror( err ) );
+  int err;
+  while ( ( err = snd_pcm_delay( m_pcmHandle, &frames ) ) < 0 ) {
+    err = snd_pcm_recover( m_pcmHandle, err, 1 );
+    ERRORMACRO( err >= 0, Error, , "Error querying number of available frames for "
+                "update of PCM device \"" << m_pcmName << "\": "
+                << snd_strerror( err ) );
+  };
   return frames;
 }
 
