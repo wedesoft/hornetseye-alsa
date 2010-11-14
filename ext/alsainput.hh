@@ -33,6 +33,7 @@ public:
   SequencePtr read(void) throw (Error);
   unsigned int rate(void);
   unsigned int channels(void);
+  void prepare(void) throw (Error);
   static VALUE cRubyClass;
   static VALUE registerRubyClass( VALUE rbModule );
   static void deleteRubyObject( void *ptr );
@@ -42,6 +43,7 @@ public:
   static VALUE wrapRead( VALUE rbSelf );
   static VALUE wrapRate( VALUE rbSelf );
   static VALUE wrapChannels( VALUE rbSelf );
+  static VALUE wrapPrepare( VALUE rbSelf );
 protected:
   snd_pcm_t *m_pcmHandle;
   std::string m_pcmName;

@@ -108,6 +108,15 @@ unsigned int AlsaInput::channels(void)
   return m_channels;
 }
 
+void AlsaInput::prepare(void) throw (Error)
+{
+  ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
+              << "\" is not open. Did you call \"close\" before?" );
+  int err = snd_pcm_prepare( m_pcmHandle );
+  ERRORMACRO( err >= 0, Error, , "Error preparing PCM device \"" << m_pcmName
+              << "\": " << snd_strerror( err ) );
+}
+
 VALUE AlsaInput::registerRubyClass( VALUE rbModule )
 {
   cRubyClass = rb_define_class_under( rbModule, "AlsaInput", rb_cObject );
@@ -117,6 +126,7 @@ VALUE AlsaInput::registerRubyClass( VALUE rbModule )
   rb_define_method( cRubyClass, "read", RUBY_METHOD_FUNC( wrapRead ), 0 );
   rb_define_method( cRubyClass, "rate", RUBY_METHOD_FUNC( wrapRate ), 0 );
   rb_define_method( cRubyClass, "channels", RUBY_METHOD_FUNC( wrapChannels ), 0 );
+  rb_define_method( cRubyClass, "prepare", RUBY_METHOD_FUNC( wrapPrepare ), 0 );
 }
 
 void AlsaInput::deleteRubyObject( void *ptr )
@@ -171,5 +181,16 @@ VALUE AlsaInput::wrapChannels( VALUE rbSelf )
 {
   AlsaInputPtr *self; Data_Get_Struct( rbSelf, AlsaInputPtr, self );
   return UINT2NUM( (*self)->channels() );
+}
+
+VALUE AlsaInput::wrapPrepare( VALUE rbSelf )
+{
+  try {
+    AlsaInputPtr *self; Data_Get_Struct( rbSelf, AlsaInputPtr, self );
+    (*self)->prepare();
+  } catch ( exception &e ) {
+    rb_raise( rb_eRuntimeError, "%s", e.what() );
+  };
+  return rbSelf;
 }
 
