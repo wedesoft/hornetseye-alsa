@@ -21,9 +21,8 @@ VALUE AlsaOutput::cRubyClass = Qnil;
 
 AlsaOutput::AlsaOutput( const string &pcmName, unsigned int rate,
                         unsigned int channels, int periods,
-                        int frames ) throw (Error):
-  m_pcmHandle(NULL), m_pcmName( pcmName ), m_rate( rate ), m_channels( channels ),
-  m_frames( frames )
+                        snd_pcm_uframes_t frames ) throw (Error):
+  m_pcmHandle(NULL), m_pcmName( pcmName ), m_rate( rate ), m_channels( channels )
 {
   try {
     snd_pcm_hw_params_t *hwParams;
@@ -52,9 +51,9 @@ AlsaOutput::AlsaOutput( const string &pcmName, unsigned int rate,
     err = snd_pcm_hw_params_set_periods( m_pcmHandle, hwParams, periods, 0 );
     ERRORMACRO( err >= 0, Error, , "Error setting number of periods of PCM device \""
                 << m_pcmName << "\" to " << periods << ": " << snd_strerror( err ) );
-    err = snd_pcm_hw_params_set_buffer_size_near( m_pcmHandle, hwParams, &m_frames );
+    err = snd_pcm_hw_params_set_buffer_size_near( m_pcmHandle, hwParams, &frames );
     ERRORMACRO( err >= 0, Error, , "Error setting buffer size of PCM device \""
-                << m_pcmName << "\" to " << m_frames << " frames: "
+                << m_pcmName << "\" to " << frames << " frames: "
                 << snd_strerror( err ) );
     err = snd_pcm_hw_params( m_pcmHandle, hwParams );
     ERRORMACRO( err >= 0, Error, , "Error setting parameters of PCM device \""
@@ -119,11 +118,6 @@ unsigned int AlsaOutput::channels(void)
   return m_channels;
 }
 
-unsigned int AlsaOutput::frames(void)
-{
-  return m_frames;
-}
-
 int AlsaOutput::avail(void) throw (Error)
 {
   ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
@@ -174,7 +168,6 @@ VALUE AlsaOutput::registerRubyClass( VALUE rbModule )
   rb_define_method( cRubyClass, "drain", RUBY_METHOD_FUNC( wrapDrain ), 0 );
   rb_define_method( cRubyClass, "rate", RUBY_METHOD_FUNC( wrapRate ), 0 );
   rb_define_method( cRubyClass, "channels", RUBY_METHOD_FUNC( wrapChannels ), 0 );
-  rb_define_method( cRubyClass, "frames", RUBY_METHOD_FUNC( wrapFrames ), 0 );
   rb_define_method( cRubyClass, "avail", RUBY_METHOD_FUNC( wrapAvail ), 0 );
   rb_define_method( cRubyClass, "delay", RUBY_METHOD_FUNC( wrapDelay ), 0 );
   rb_define_method( cRubyClass, "prepare", RUBY_METHOD_FUNC( wrapPrepare ), 0 );
@@ -253,12 +246,6 @@ VALUE AlsaOutput::wrapChannels( VALUE rbSelf )
 {
   AlsaOutputPtr *self; Data_Get_Struct( rbSelf, AlsaOutputPtr, self );
   return UINT2NUM( (*self)->channels() );
-}
-
-VALUE AlsaOutput::wrapFrames( VALUE rbSelf )
-{
-  AlsaOutputPtr *self; Data_Get_Struct( rbSelf, AlsaOutputPtr, self );
-  return UINT2NUM( (*self)->frames() );
 }
 
 VALUE AlsaOutput::wrapAvail( VALUE rbSelf )

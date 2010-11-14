@@ -14,6 +14,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "alsaoutput.hh"
+#include "alsainput.hh"
 
 #ifdef WIN32
 #define DLLEXPORT __declspec(dllexport)
@@ -32,6 +33,7 @@ extern "C" {
     rb_require( "multiarray" );
     VALUE rbHornetseye = rb_define_module( "Hornetseye" );
     AlsaOutput::registerRubyClass( rbHornetseye );
+    AlsaInput::registerRubyClass( rbHornetseye );
     rb_require( "hornetseye_alsa_ext.rb" );
   }
 
