@@ -30,7 +30,7 @@ public:
              int periods = 16, snd_pcm_uframes_t frames = 1024 ) throw (Error);
   virtual ~AlsaInput(void);
   void close(void);
-  SequencePtr read(void) throw (Error);
+  SequencePtr read( int samples ) throw (Error);
   unsigned int rate(void);
   unsigned int channels(void);
   void prepare(void) throw (Error);
@@ -40,7 +40,7 @@ public:
   static VALUE wrapNew( VALUE rbClass, VALUE rbPCMName, VALUE rbRate,
                         VALUE rbChannels, VALUE rbPeriods, VALUE rbFrames );
   static VALUE wrapClose( VALUE rbSelf );
-  static VALUE wrapRead( VALUE rbSelf );
+  static VALUE wrapRead( VALUE rbSelf, VALUE rbSamples );
   static VALUE wrapRate( VALUE rbSelf );
   static VALUE wrapChannels( VALUE rbSelf );
   static VALUE wrapPrepare( VALUE rbSelf );

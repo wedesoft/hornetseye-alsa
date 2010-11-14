@@ -32,8 +32,9 @@ module Hornetseye
 
     alias_method :orig_read, :read
 
-    def read
-      orig_read
+    def read( samples )
+      Hornetseye::MultiArray( SINT, channels, samples ).
+        new orig_read( samples ).memory
     end
 
   end

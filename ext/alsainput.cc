@@ -78,10 +78,11 @@ void AlsaInput::close(void)
   };
 }
 
-SequencePtr AlsaInput::read(void) throw (Error)
+SequencePtr AlsaInput::read( int samples ) throw (Error)
 {
   ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
               << "\" is not open. Did you call \"close\" before?" );
+  int n = samples * 2 * m_channels;
 #if 0
   int n = frame->size() / ( 2 * m_channels );
   int err;
@@ -94,7 +95,7 @@ SequencePtr AlsaInput::read(void) throw (Error)
   ERRORMACRO( n == err, Error, , "Only managed to write " << err << " of " << n
               << " frames to PCM device \"" << m_pcmName << "\"" );
 #endif
-  SequencePtr sequence( new Sequence( 1024 ) );
+  SequencePtr sequence( new Sequence( n ) );
   return sequence;
 }
 
@@ -123,7 +124,7 @@ VALUE AlsaInput::registerRubyClass( VALUE rbModule )
   rb_define_singleton_method( cRubyClass, "new",
                               RUBY_METHOD_FUNC( wrapNew ), 5 );
   rb_define_method( cRubyClass, "close", RUBY_METHOD_FUNC( wrapClose ), 0 );
-  rb_define_method( cRubyClass, "read", RUBY_METHOD_FUNC( wrapRead ), 0 );
+  rb_define_method( cRubyClass, "read", RUBY_METHOD_FUNC( wrapRead ), 1 );
   rb_define_method( cRubyClass, "rate", RUBY_METHOD_FUNC( wrapRate ), 0 );
   rb_define_method( cRubyClass, "channels", RUBY_METHOD_FUNC( wrapChannels ), 0 );
   rb_define_method( cRubyClass, "prepare", RUBY_METHOD_FUNC( wrapPrepare ), 0 );
@@ -158,12 +159,12 @@ VALUE AlsaInput::wrapClose( VALUE rbSelf )
   return rbSelf;
 }
 
-VALUE AlsaInput::wrapRead( VALUE rbSelf )
+VALUE AlsaInput::wrapRead( VALUE rbSelf, VALUE rbSamples )
 {
   VALUE rbRetVal = Qnil;
   try {
     AlsaInputPtr *self; Data_Get_Struct( rbSelf, AlsaInputPtr, self );
-    SequencePtr sequence( (*self)->read() );
+    SequencePtr sequence( (*self)->read( NUM2INT( rbSamples ) ) );
     rbRetVal = sequence->rubyObject();
   } catch ( exception &e ) {
     rb_raise( rb_eRuntimeError, "%s", e.what() );
