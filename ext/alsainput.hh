@@ -26,7 +26,7 @@ class AlsaInput
 {
 public:
   AlsaInput( const std::string &pcmName = "default:0",
-             unsigned int rate = 48000, unsigned int channels = 2,
+             unsigned int rate = 44100, unsigned int channels = 2,
              int periods = 16, snd_pcm_uframes_t frames = 1024 ) throw (Error);
   virtual ~AlsaInput(void);
   void close(void);

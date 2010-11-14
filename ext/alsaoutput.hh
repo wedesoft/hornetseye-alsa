@@ -26,7 +26,7 @@ class AlsaOutput
 {
 public:
   AlsaOutput( const std::string &pcmName = "default:0",
-              unsigned int rate = 48000, unsigned int channels = 2,
+              unsigned int rate = 44100, unsigned int channels = 2,
               int periods = 16, snd_pcm_uframes_t frames = 1024 ) throw (Error);
   virtual ~AlsaOutput(void);
   void close(void);
