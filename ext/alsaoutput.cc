@@ -28,7 +28,7 @@ AlsaOutput::AlsaOutput( const string &pcmName, unsigned int rate,
     snd_pcm_hw_params_t *hwParams;
     snd_pcm_hw_params_alloca( &hwParams );
     int err = snd_pcm_open( &m_pcmHandle, m_pcmName.c_str(), SND_PCM_STREAM_PLAYBACK,
-                            SND_PCM_NONBLOCK );
+                            0 );// SND_PCM_NONBLOCK
     ERRORMACRO( err >= 0, Error, , "Error opening PCM device \"" << m_pcmName
                 << "\": " << snd_strerror( err ) );
     err = snd_pcm_hw_params_any( m_pcmHandle, hwParams );
