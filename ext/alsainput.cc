@@ -28,7 +28,7 @@ AlsaInput::AlsaInput( const string &pcmName, unsigned int rate,
     snd_pcm_hw_params_t *hwParams;
     snd_pcm_hw_params_alloca( &hwParams );
     int err = snd_pcm_open( &m_pcmHandle, m_pcmName.c_str(), SND_PCM_STREAM_CAPTURE,
-                            SND_PCM_NONBLOCK );
+                            0 );
     ERRORMACRO( err >= 0, Error, , "Error opening PCM device \"" << m_pcmName
                 << "\": " << snd_strerror( err ) );
     err = snd_pcm_hw_params_any( m_pcmHandle, hwParams );
@@ -82,17 +82,16 @@ SequencePtr AlsaInput::read( int samples ) throw (Error)
 {
   ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
               << "\" is not open. Did you call \"close\" before?" );
-  int n = samples * 2 * m_channels;
-  SequencePtr frame( new Sequence( n ) );
+  SequencePtr frame( new Sequence( (int)( samples * 2 * m_channels ) ) );
   int err;
   while ( ( err = snd_pcm_readi( m_pcmHandle, (short int *)frame->data(),
-                                 n ) ) < 0 ) {
+                                 samples ) ) < 0 ) {
     err = snd_pcm_recover( m_pcmHandle, err, 1 );
     ERRORMACRO( err >= 0, Error, , "Error reading audio frames from PCM device \""
                 << m_pcmName << "\": " << snd_strerror( err ) );
   };
-  ERRORMACRO( n == err, Error, , "Only managed to read " << err << " of " << n
-              << " frames from PCM device \"" << m_pcmName << "\"" );
+  ERRORMACRO( samples == err, Error, , "Only managed to read " << err << " of "
+              << samples << " frames from PCM device \"" << m_pcmName << "\"" );
   return frame;
 }
 
