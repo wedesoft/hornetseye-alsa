@@ -105,6 +105,36 @@ unsigned int AlsaInput::channels(void)
   return m_channels;
 }
 
+int AlsaInput::avail(void) throw (Error)
+{
+  ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
+              << "\" is not open. Did you call \"close\" before?" );
+  snd_pcm_sframes_t frames;
+  int err = 0;
+  while ( ( frames = snd_pcm_avail( m_pcmHandle ) ) < 0 ) {
+    err = snd_pcm_recover( m_pcmHandle, frames, 1 );
+    ERRORMACRO( err >= 0, Error, , "Error querying number of available frames for "
+              "retrieval from PCM device \"" << m_pcmName << "\": "
+              << snd_strerror( err ) );
+  };
+  return frames;
+}
+
+int AlsaInput::delay(void) throw (Error)
+{
+  ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
+              << "\" is not open. Did you call \"close\" before?" );
+  snd_pcm_sframes_t frames;
+  int err;
+  while ( ( err = snd_pcm_delay( m_pcmHandle, &frames ) ) < 0 ) {
+    err = snd_pcm_recover( m_pcmHandle, err, 1 );
+    ERRORMACRO( err >= 0, Error, , "Error querying number of available frames for "
+                "capture on PCM device \"" << m_pcmName << "\": "
+                << snd_strerror( err ) );
+  };
+  return frames;
+}
+
 void AlsaInput::prepare(void) throw (Error)
 {
   ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
@@ -123,6 +153,8 @@ VALUE AlsaInput::registerRubyClass( VALUE rbModule )
   rb_define_method( cRubyClass, "read", RUBY_METHOD_FUNC( wrapRead ), 1 );
   rb_define_method( cRubyClass, "rate", RUBY_METHOD_FUNC( wrapRate ), 0 );
   rb_define_method( cRubyClass, "channels", RUBY_METHOD_FUNC( wrapChannels ), 0 );
+  rb_define_method( cRubyClass, "avail", RUBY_METHOD_FUNC( wrapAvail ), 0 );
+  rb_define_method( cRubyClass, "delay", RUBY_METHOD_FUNC( wrapDelay ), 0 );
   rb_define_method( cRubyClass, "prepare", RUBY_METHOD_FUNC( wrapPrepare ), 0 );
 }
 
@@ -178,6 +210,30 @@ VALUE AlsaInput::wrapChannels( VALUE rbSelf )
 {
   AlsaInputPtr *self; Data_Get_Struct( rbSelf, AlsaInputPtr, self );
   return UINT2NUM( (*self)->channels() );
+}
+
+VALUE AlsaInput::wrapAvail( VALUE rbSelf )
+{
+  VALUE rbRetVal = Qnil;
+  try {
+    AlsaInputPtr *self; Data_Get_Struct( rbSelf, AlsaInputPtr, self );
+    rbRetVal = INT2NUM( (*self)->avail() );
+  } catch ( exception &e ) {
+    rb_raise( rb_eRuntimeError, "%s", e.what() );
+  };
+  return rbRetVal;
+}
+
+VALUE AlsaInput::wrapDelay( VALUE rbSelf )
+{
+  VALUE rbRetVal = Qnil;
+  try {
+    AlsaInputPtr *self; Data_Get_Struct( rbSelf, AlsaInputPtr, self );
+    rbRetVal = INT2NUM( (*self)->delay() );
+  } catch ( exception &e ) {
+    rb_raise( rb_eRuntimeError, "%s", e.what() );
+  };
+  return rbRetVal;
 }
 
 VALUE AlsaInput::wrapPrepare( VALUE rbSelf )

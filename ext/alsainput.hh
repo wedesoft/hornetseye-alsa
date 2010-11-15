@@ -33,6 +33,8 @@ public:
   SequencePtr read( int samples ) throw (Error);
   unsigned int rate(void);
   unsigned int channels(void);
+  int avail(void) throw (Error);
+  int delay(void) throw (Error);
   void prepare(void) throw (Error);
   static VALUE cRubyClass;
   static VALUE registerRubyClass( VALUE rbModule );
@@ -43,6 +45,8 @@ public:
   static VALUE wrapRead( VALUE rbSelf, VALUE rbSamples );
   static VALUE wrapRate( VALUE rbSelf );
   static VALUE wrapChannels( VALUE rbSelf );
+  static VALUE wrapAvail( VALUE rbSelf );
+  static VALUE wrapDelay( VALUE rbSelf );
   static VALUE wrapPrepare( VALUE rbSelf );
 protected:
   snd_pcm_t *m_pcmHandle;
