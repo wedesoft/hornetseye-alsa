@@ -17,12 +17,32 @@
 # Namespace of Hornetseye computer vision library
 module Hornetseye
 
+  # Class for playing sounds using the ALSA library
+  #
+  # @see http://www.alsa-project.org/
   class AlsaOutput
 
     class << self
 
       alias_method :orig_new, :new
-
+     
+      # Open a sound device
+      #
+      # Open the specified sound device for writing. Note that the desired sample rate
+      # may not be supported. In that case the sound library will provide a sampling
+      # rate near the desired one.
+      #
+      # @example Open a sound device
+      #   speaker = AlsaOutput.new 'default:0', 44_100, 2, 16, 1024
+      #
+      # @param [String] pcm_name Name of the PCM device
+      # @param [Integer] rate Desired sampling rate.
+      # @param [Integer] channels Number of channels (1=mono, 2=stereo).
+      # @param [Integer] periods Number of audio frames of the output buffer.
+      # @param [Integer] frames Size of the audio frames of the output buffer.
+      # @return [AlsaOutput] An object for accessing the sound device.
+      #
+      # @see #rate
       def new( pcm_name = 'default:0', rate = 48000, channels = 2, periods = 16,
                frames = 1024 )
         orig_new pcm_name, rate, channels, periods, frames
@@ -32,6 +52,24 @@ module Hornetseye
 
     alias_method :orig_write, :write
 
+    # Write an audio frame to the sound device
+    #
+    # The audio data is written to the output buffer of the sound device. Playback is
+    # resumed if a buffer underflow occurred earlier. The first dimension of the array
+    # with the audio data must match the number of channels of the audio device. The
+    # second dimension is the number of audio samples.
+    #
+    # A blocking write operation is used. I.e. the program is blocked until there is
+    # sufficient space in the audio output buffer.
+    #
+    # @example Writing audio samples
+    #   speaker = AlsaOutput.new 'default:0', 44_100, 2, 16, 1024
+    #   wave = lazy( 2, 110 ) { |j,i| Math.sin( i * 2 * Math::PI / 110 ) * 0x7FFF }.to_sint
+    #   while true
+    #     speaker.write wave
+    #   end
+    #
+    # @param [Node] frame A two-dimensional array of short-integer audio samples.
     def write( frame )
       if frame.typecode != SINT
         raise "Audio data must be of type SINT (but was #{frame.typecode})"
