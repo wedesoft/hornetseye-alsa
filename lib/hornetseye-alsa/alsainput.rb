@@ -45,8 +45,8 @@ module Hornetseye
       # @param [String] pcm_name Name of the PCM device
       # @param [Integer] rate Desired sampling rate.
       # @param [Integer] channels Number of channels (1=mono, 2=stereo).
-      # @param [Integer] periods Number of audio frames of the output buffer.
-      # @param [Integer] frames Size of the audio frames of the output buffer.
+      # @param [Integer] periods Number of audio frames of the input buffer.
+      # @param [Integer] frames Size of the audio frames of the input buffer.
       # @return [AlsaInput] An object for accessing the microphone.
       #
       # @see #rate
@@ -69,7 +69,7 @@ module Hornetseye
     # Audio data is read from the input buffer.
     #
     # A blocking read operation is used. I.e. the program is blocked until there is
-    # sufficient data available in the audio output buffer.
+    # sufficient data available in the audio input buffer.
     #
     # @example Read 3 seconds of audio samples
     #   require 'hornetseye_alsa'
