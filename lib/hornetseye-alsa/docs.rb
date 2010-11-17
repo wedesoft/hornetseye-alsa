@@ -19,19 +19,41 @@ module Hornetseye
 
   class AlsaInput
 
+    # Get the sampling rate of the sound device
+    #
+    # The sampling rate may be different to the desired sampling rate specified in
+    # the constructor.
+    #
+    # @return [Integer] The sampling rate of the sound device.
     attr_reader :rate
 
+    # Number of audio channels
+    #
+    # @return [Integer] Number of audio channels (1=mono, 2=stereo).
     attr_reader :channels
 
+    # Close the audio device
+    #
+    # @return [AlsaInput] Returns +self+.
     def close
     end
 
+    # Space available for recording to the audio buffer
+    #
+    # @return [Integer] Number of audio samples left for recording before the buffer
+    #         overflows.
     def avail
     end
 
+    # Number of samples available for retrieval
+    #
+    # @return [Integer] Number of audio samples available for retrieval.
     def delay
     end
 
+    # Reset the sound device
+    #
+    # @return [AlsaInput] Returns +self+.
     def prepare
     end
 
@@ -53,18 +75,24 @@ module Hornetseye
     attr_reader :channels
 
     # Close the audio device
+    #
+    # @return [AlsaOutput] Returns +self+.
     def close
     end
 
     # Drop content of audio output buffer
+    #
+    # @return [AlsaOutput] Returns +self+.
     def drop
     end
 
     # Wait until audio buffer underflows
+    #
+    # @return [AlsaOutput] Returns +self+.
     def drain
     end
 
-    # Space available for writing in the audio buffer
+    # Space available for writing to the audio buffer
     #
     # @return [Integer] Number of audio samples which can be written to the audio
     #         buffer.
@@ -80,10 +108,12 @@ module Hornetseye
     def delay
     end
 
-    # Reset the sound device.
+    # Reset the sound device
     #
     # One needs to call this method if one wants to resume playing audio samples after
-    # calling #drop or #drain.
+    # calling #drop.
+    #
+    # @return [AlsaOutput] Returns +self+.
     def prepare
     end
 
