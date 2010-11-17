@@ -8,16 +8,21 @@ hornetseye-alsa
 Synopsis
 --------
 
-This Ruby extension provides an interface for playing audio data using ALSA.
+This Ruby extension provides an interface for playing audio data using the Advanced
+Linux Sound Architecture (ALSA).
 
 Installation
 ------------
+*hornetseye-alsa* requires the ALSA library. If you are running Debian or (K)ubuntu,
+you can install it like this:
 
-To install the Hornetseye ALSA bindings, use the following command:
+    $ sudo aptitude install libasound2-dev
+
+To install this Ruby extension bindings, use the following command:
 
     $ sudo gem install hornetseye-alsa
 
-You can install from source as follows:
+Alternatively you can build and install the Ruby extension from source as follows:
 
     $ rake
     $ sudo rake install
