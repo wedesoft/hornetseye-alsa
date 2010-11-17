@@ -8,17 +8,15 @@ hornetseye-alsa
 Synopsis
 --------
 
-This Ruby extension provides an interface for playing audio data using the Advanced
-Linux Sound Architecture (ALSA).
+This Ruby extension provides an interface for playing audio data using the Advanced Linux Sound Architecture (ALSA).
 
 Installation
 ------------
-*hornetseye-alsa* requires the ALSA library. If you are running Debian or (K)ubuntu,
-you can install it like this:
+*hornetseye-alsa* requires the ALSA library. If you are running Debian or (K)ubuntu, you can install it like this:
 
     $ sudo aptitude install libasound2-dev
 
-To install this Ruby extension bindings, use the following command:
+To install this Ruby extension, use the following command:
 
     $ sudo gem install hornetseye-alsa
 
@@ -34,8 +32,7 @@ Simply run Interactive Ruby:
 
     $ irb
 
-You can load and use ALSA as shown below. This example will open microphone and
-speakers and then write the input of the microphone to the speakers.
+You can load and use ALSA as shown below. This example will open microphone and speakers and then write the input of the microphone to the speakers.
 
     require 'rubygems'
     require 'hornetseye_alsa'
