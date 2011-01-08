@@ -12,6 +12,7 @@ This Ruby extension provides an interface for playing and recording audio data u
 
 Installation
 ------------
+
 *hornetseye-alsa* requires the ALSA library. If you are running Debian or (K)ubuntu, you can install it like this:
 
     $ sudo aptitude install libasound2-dev
