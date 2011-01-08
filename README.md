@@ -8,7 +8,7 @@ hornetseye-alsa
 Synopsis
 --------
 
-This Ruby extension provides an interface for playing audio data using the Advanced Linux Sound Architecture (ALSA).
+This Ruby extension provides an interface for playing and recording audio data using the Advanced Linux Sound Architecture (ALSA).
 
 Installation
 ------------
