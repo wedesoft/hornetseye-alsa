@@ -50,7 +50,7 @@ module Hornetseye
       # @return [AlsaOutput] An object for accessing the speakers.
       #
       # @see #rate
-      def new( pcm_name = 'default:0', rate = 48000, channels = 2, periods = 16,
+      def new( pcm_name = 'default:0', rate = 48000, channels = 2, periods = 8,
                frames = 1024 )
         orig_new pcm_name, rate, channels, periods, frames
       end
