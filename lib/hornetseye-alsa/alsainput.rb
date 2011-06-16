@@ -79,9 +79,8 @@ module Hornetseye
     #
     # @param [Integer] samples Number of samples to read.
     # @return [Node] A two-dimensional array with short-integer audio samples.
-    def read( samples )
-      Hornetseye::MultiArray( SINT, channels, samples ).
-        new orig_read( samples ).memory
+    def read(samples)
+      MultiArray.import SINT, orig_read(samples).memory, channels, samples
     end
 
   end

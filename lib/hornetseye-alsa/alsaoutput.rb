@@ -94,7 +94,7 @@ module Hornetseye
         raise "Audio frame must have #{channels} channel(s) but had " +
               "#{frame.shape.first}"
       end
-      orig_write Hornetseye::Sequence( UBYTE, 2 * frame.size ).new( frame.memory )
+      orig_write Hornetseye::Sequence(UBYTE).new 2 * frame.size, :memory => frame.memory 
       frame
     end
 
