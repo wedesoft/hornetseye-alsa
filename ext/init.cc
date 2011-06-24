@@ -30,7 +30,7 @@ extern "C" {
 
   void Init_hornetseye_alsa(void)
   {
-    rb_require( "multiarray" );
+    rb_eval_string( "require 'multiarray'" );
     VALUE rbHornetseye = rb_define_module( "Hornetseye" );
     AlsaOutput::registerRubyClass( rbHornetseye );
     AlsaInput::registerRubyClass( rbHornetseye );
