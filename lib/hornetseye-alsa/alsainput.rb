@@ -40,7 +40,7 @@ module Hornetseye
       # @example Open standard microphone device
       #   require 'hornetseye_alsa'
       #   include Hornetseye
-      #   microphone = AlsaInput.new 'default:0', 44_100, 2
+      #   microphone = AlsaInput.new 'default', 44_100, 2
       #
       # @param [String] pcm_name Name of the PCM device
       # @param [Integer] rate Desired sampling rate.
@@ -50,7 +50,7 @@ module Hornetseye
       # @return [AlsaInput] An object for accessing the microphone.
       #
       # @see #rate
-      def new( pcm_name = 'default:0', rate = 48000, channels = 2, periods = 8,
+      def new( pcm_name = 'default', rate = 48000, channels = 2, periods = 8,
                frames = 1024 )
         orig_new pcm_name, rate, channels, periods, frames
       end
@@ -74,7 +74,7 @@ module Hornetseye
     # @example Read 3 seconds of audio samples
     #   require 'hornetseye_alsa'
     #   include Hornetseye
-    #   microphone = AlsaInput.new 'default:0', 44_100, 2
+    #   microphone = AlsaInput.new 'default', 44_100, 2
     #   data = microphone.read 3 * 44_100
     #
     # @param [Integer] samples Number of samples to read.

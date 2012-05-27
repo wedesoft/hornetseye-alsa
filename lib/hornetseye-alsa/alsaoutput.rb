@@ -40,7 +40,7 @@ module Hornetseye
       # @example Open default speakers
       #   require 'hornetseye_alsa'
       #   include Hornetseye
-      #   speaker = AlsaOutput.new 'default:0', 44_100, 2
+      #   speaker = AlsaOutput.new 'default', 44_100, 2
       #
       # @param [String] pcm_name Name of the PCM device
       # @param [Integer] rate Desired sampling rate.
@@ -50,7 +50,7 @@ module Hornetseye
       # @return [AlsaOutput] An object for accessing the speakers.
       #
       # @see #rate
-      def new( pcm_name = 'default:0', rate = 48000, channels = 2, periods = 8,
+      def new( pcm_name = 'default', rate = 48000, channels = 2, periods = 8,
                frames = 1024 )
         orig_new pcm_name, rate, channels, periods, frames
       end
@@ -75,7 +75,7 @@ module Hornetseye
     # @example Play a 400Hz tune for 3 seconds
     #   require 'hornetseye_alsa'
     #   include Hornetseye
-    #   speaker = AlsaOutput.new 'default:0', 44_100, 2
+    #   speaker = AlsaOutput.new 'default', 44_100, 2
     #   L = 44_100 / 400
     #   wave = lazy( 2, L ) { |j,i| Math.sin( i * 2 * Math::PI / L ) * 0x7FFF }.to_sint
     #   ( 3 * 400 ).times { speaker.write wave }
