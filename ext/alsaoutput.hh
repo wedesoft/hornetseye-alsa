@@ -32,6 +32,7 @@ public:
   void write( SequencePtr sequence ) throw (Error);
   void drop(void) throw (Error);
   void drain(void) throw (Error);
+  void prepare(void) throw (Error);
   unsigned int rate(void);
   unsigned int channels(void);
   int delay(void) throw (Error);
@@ -46,6 +47,7 @@ public:
   static VALUE wrapWrite( VALUE rbSelf, VALUE rbSequence );
   static VALUE wrapDrop( VALUE rbSelf );
   static VALUE wrapDrain( VALUE rbSelf );
+  static VALUE wrapPrepare( VALUE rbSelf );
   static VALUE wrapRate( VALUE rbSelf );
   static VALUE wrapChannels( VALUE rbSelf );
   static VALUE wrapDelay( VALUE rbSelf );
