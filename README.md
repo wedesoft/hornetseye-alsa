@@ -2,7 +2,7 @@ hornetseye-alsa
 ===============
 
 **Author**:       Jan Wedekind
-**Copyright**:    2010
+**Copyright**:    2012
 **License**:      GPL
 
 Synopsis

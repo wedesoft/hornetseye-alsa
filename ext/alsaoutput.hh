@@ -1,5 +1,5 @@
 /* HornetsEye - Computer Vision with Ruby
-   Copyright (C) 2006, 2007, 2008, 2009, 2010   Jan Wedekind
+   Copyright (C) 2012  Jan Wedekind
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,9 +25,8 @@
 class AlsaOutput
 {
 public:
-  AlsaOutput( const std::string &pcmName = "default:0",
-              unsigned int rate = 48000, unsigned int channels = 2,
-              int periods = 16, snd_pcm_uframes_t frames = 1024 ) throw (Error);
+  AlsaOutput(const std::string &pcmName = "default:0",
+             unsigned int rate = 48000, unsigned int channels = 2) throw (Error);
   virtual ~AlsaOutput(void);
   void close(void);
   void write( SequencePtr sequence ) throw (Error);
@@ -35,28 +34,38 @@ public:
   void drain(void) throw (Error);
   unsigned int rate(void);
   unsigned int channels(void);
-  int avail(void) throw (Error);
   int delay(void) throw (Error);
-  void prepare(void) throw (Error);
+  void lock(void);
+  void unlock(void);
   static VALUE cRubyClass;
   static VALUE registerRubyClass( VALUE rbModule );
   static void deleteRubyObject( void *ptr );
-  static VALUE wrapNew( VALUE rbClass, VALUE rbPCMName, VALUE rbRate,
-                        VALUE rbChannels, VALUE rbPeriods, VALUE rbFrames );
+  static VALUE wrapNew(VALUE rbClass, VALUE rbPCMName, VALUE rbRate,
+                       VALUE rbChannels);
   static VALUE wrapClose( VALUE rbSelf );
   static VALUE wrapWrite( VALUE rbSelf, VALUE rbSequence );
   static VALUE wrapDrop( VALUE rbSelf );
   static VALUE wrapDrain( VALUE rbSelf );
   static VALUE wrapRate( VALUE rbSelf );
   static VALUE wrapChannels( VALUE rbSelf );
-  static VALUE wrapAvail( VALUE rbSelf );
   static VALUE wrapDelay( VALUE rbSelf );
-  static VALUE wrapPrepare( VALUE rbSelf );
 protected:
+  int avail(void) throw (Error);
+  void writei(short int *data, int count) throw (Error);
+  void threadFunc(void);
+  static void *staticThreadFunc( void *self );
   snd_pcm_t *m_pcmHandle;
   std::string m_pcmName;
   unsigned int m_rate;
   unsigned int m_channels;
+  snd_pcm_uframes_t m_periodSize;
+  bool m_threadInitialised;
+  boost::shared_array<short int> m_data;
+  int m_start;
+  int m_count;
+  int m_size;
+  pthread_t m_thread;
+  pthread_mutex_t m_mutex;
 };
 
 typedef boost::shared_ptr< AlsaOutput > AlsaOutputPtr;

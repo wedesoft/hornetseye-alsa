@@ -1,5 +1,5 @@
 # hornetseye-alsa - Play audio data using libalsa
-# Copyright (C) 2010 Jan Wedekind
+# Copyright (C) 2012 Jan Wedekind
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,14 +45,11 @@ module Hornetseye
       # @param [String] pcm_name Name of the PCM device
       # @param [Integer] rate Desired sampling rate.
       # @param [Integer] channels Number of channels (1=mono, 2=stereo).
-      # @param [Integer] periods Number of audio frames of the output buffer.
-      # @param [Integer] frames Size of the audio frames of the output buffer.
       # @return [AlsaOutput] An object for accessing the speakers.
       #
       # @see #rate
-      def new( pcm_name = 'default', rate = 48000, channels = 2, periods = 8,
-               frames = 1024 )
-        orig_new pcm_name, rate, channels, periods, frames
+      def new(pcm_name = 'default', rate = 48000, channels = 2)
+        orig_new pcm_name, rate, channels
       end
 
     end
