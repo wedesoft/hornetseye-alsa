@@ -29,7 +29,7 @@ AlsaOutput::AlsaOutput(const string &pcmName, unsigned int rate,
     snd_pcm_hw_params_t *hwParams;
     snd_pcm_hw_params_alloca(&hwParams);
     int err = snd_pcm_open(&m_pcmHandle, m_pcmName.c_str(), SND_PCM_STREAM_PLAYBACK,
-                           0);//SND_PCM_NONBLOCK);
+                           SND_PCM_NONBLOCK);
     ERRORMACRO(err >= 0, Error, , "Error opening PCM device \"" << m_pcmName
                << "\": " << snd_strerror(err));
     err = snd_pcm_hw_params_any(m_pcmHandle, hwParams);
@@ -145,17 +145,6 @@ void AlsaOutput::drain(void) throw (Error)
   snd_pcm_drain(m_pcmHandle);
 }
 
-void AlsaOutput::prepare(void) throw (Error)
-{
-  ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
-              << "\" is not open. Did you call \"close\" before?" );
-
-  int err = snd_pcm_prepare( m_pcmHandle );
-  ERRORMACRO( err >= 0, Error, , "Error preparing PCM device \"" << m_pcmName
-              << "\": " << snd_strerror( err ) );
-  // pthread_mutex_lock( &m_mutex );
-}
-
 unsigned int AlsaOutput::rate(void)
 {
   return m_rate;
@@ -214,7 +203,10 @@ void AlsaOutput::writei(short int *data, int count) throw (Error)
 {
   int err;
   while ((err = snd_pcm_writei(m_pcmHandle, data, count)) < 0) {
-    err = snd_pcm_recover(m_pcmHandle, err, 1);
+    if (err == -EBADFD)
+      err = snd_pcm_prepare(m_pcmHandle);
+    else
+      err = snd_pcm_recover(m_pcmHandle, err, 1);
     ERRORMACRO(err >= 0, Error, , "Error writing audio frames to PCM device \""
                << m_pcmName << "\": " << snd_strerror(err));
   };
@@ -265,7 +257,6 @@ VALUE AlsaOutput::registerRubyClass( VALUE rbModule )
   rb_define_method( cRubyClass, "write", RUBY_METHOD_FUNC( wrapWrite ), 1 );
   rb_define_method( cRubyClass, "drop", RUBY_METHOD_FUNC( wrapDrop ), 0 );
   rb_define_method( cRubyClass, "drain", RUBY_METHOD_FUNC( wrapDrain ), 0 );
-  rb_define_method( cRubyClass, "prepare", RUBY_METHOD_FUNC( wrapPrepare ), 0 );
   rb_define_method( cRubyClass, "rate", RUBY_METHOD_FUNC( wrapRate ), 0 );
   rb_define_method( cRubyClass, "channels", RUBY_METHOD_FUNC( wrapChannels ), 0 );
   rb_define_method( cRubyClass, "delay", RUBY_METHOD_FUNC( wrapDelay ), 0 );
@@ -326,17 +317,6 @@ VALUE AlsaOutput::wrapDrain( VALUE rbSelf )
   try {
     AlsaOutputPtr *self; Data_Get_Struct( rbSelf, AlsaOutputPtr, self );
     (*self)->drain();
-  } catch ( exception &e ) {
-    rb_raise( rb_eRuntimeError, "%s", e.what() );
-  };
-  return rbSelf;
-}
-
-VALUE AlsaOutput::wrapPrepare( VALUE rbSelf )
-{
-  try {
-    AlsaOutputPtr *self; Data_Get_Struct( rbSelf, AlsaOutputPtr, self );
-    (*self)->prepare();
   } catch ( exception &e ) {
     rb_raise( rb_eRuntimeError, "%s", e.what() );
   };
