@@ -130,8 +130,8 @@ void AlsaOutput::drop(void) throw (Error)
   lock();
   m_data.reset();
   m_count = 0;
-  unlock();
   snd_pcm_drop(m_pcmHandle);
+  unlock();
 }
 
 void AlsaOutput::drain(void) throw (Error)
