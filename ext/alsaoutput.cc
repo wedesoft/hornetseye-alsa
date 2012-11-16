@@ -77,7 +77,7 @@ AlsaOutput::~AlsaOutput(void)
 
 void AlsaOutput::close(void)
 {
-  if ( m_pcmHandle != NULL ) {
+  if (m_pcmHandle != NULL) {
     drain();
     pthread_mutex_destroy(&m_mutex);
     snd_pcm_close( m_pcmHandle );
@@ -113,10 +113,10 @@ void AlsaOutput::write(SequencePtr frame) throw (Error)
     m_size = m_size_new;
   };
   int offset = m_start + m_count;
-  if (offset > m_size) offset -= m_size;
+  if (offset >= m_size) offset -= m_size;
   if (offset + n > m_size) {
     memcpy(m_data.get() + offset * m_channels, frame->data(), (m_size - offset) * 2 * m_channels);
-    memcpy(m_data.get(), frame->data() + (m_size - offset) * m_channels, (n + m_size - offset) * 2 * m_channels);
+    memcpy(m_data.get(), frame->data() + (m_size - offset) * 2 * m_channels, (n + offset - m_size) * 2 * m_channels);
   } else
     memcpy(m_data.get() + offset * m_channels, frame->data(), n * 2 * m_channels);
   m_count += n;
@@ -153,19 +153,6 @@ unsigned int AlsaOutput::rate(void)
 unsigned int AlsaOutput::channels(void)
 {
   return m_channels;
-}
-
-int AlsaOutput::avail(void) throw (Error)
-{
-  snd_pcm_sframes_t frames;
-  int err = 0;
-  while ( ( frames = snd_pcm_avail( m_pcmHandle ) ) < 0 ) {
-    err = snd_pcm_recover( m_pcmHandle, frames, 1 );
-    ERRORMACRO( err >= 0, Error, , "Error querying number of available frames for "
-              "update of PCM device \"" << m_pcmName << "\": "
-              << snd_strerror( err ) );
-  };
-  return frames;
 }
 
 int AlsaOutput::delay(void) throw (Error)
@@ -226,11 +213,8 @@ void AlsaOutput::threadFunc(void)
       if (m_count <= 0) m_data.reset();
       if (m_start >= m_size) m_start -= m_size;
       if (m_data.get()) {
-        if (m_start + n > m_size) {
-          writei(m_data.get() + m_start * m_channels, m_size - m_start);
-          writei(m_data.get(), m_start + n - m_size);
-        } else
-          writei(m_data.get() + m_start * m_channels, n);
+        if (m_start + n > m_size) n = m_size - m_start;
+        writei(m_data.get() + m_start * m_channels, n);
         m_start += n;
         m_count -= n;
       } else
@@ -238,6 +222,7 @@ void AlsaOutput::threadFunc(void)
       unlock();
     } catch (Error &e) {
       quit = true;
+      m_data.reset();
       unlock();
     }
   };

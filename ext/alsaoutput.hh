@@ -50,7 +50,6 @@ public:
   static VALUE wrapChannels( VALUE rbSelf );
   static VALUE wrapDelay( VALUE rbSelf );
 protected:
-  int avail(void) throw (Error);
   void writei(short int *data, int count) throw (Error);
   void threadFunc(void);
   static void *staticThreadFunc( void *self );

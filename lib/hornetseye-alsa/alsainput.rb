@@ -45,14 +45,11 @@ module Hornetseye
       # @param [String] pcm_name Name of the PCM device
       # @param [Integer] rate Desired sampling rate.
       # @param [Integer] channels Number of channels (1=mono, 2=stereo).
-      # @param [Integer] periods Number of audio frames of the input buffer.
-      # @param [Integer] frames Size of the audio frames of the input buffer.
       # @return [AlsaInput] An object for accessing the microphone.
       #
       # @see #rate
-      def new( pcm_name = 'default', rate = 48000, channels = 2, periods = 8,
-               frames = 1024 )
-        orig_new pcm_name, rate, channels, periods, frames
+      def new(pcm_name = 'default', rate = 48000, channels = 2)
+        orig_new pcm_name, rate, channels
       end
 
     end
