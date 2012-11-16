@@ -130,6 +130,10 @@ void AlsaInput::drop(void) throw (Error)
   m_count = 0;
   snd_pcm_drop(m_pcmHandle);
   unlock();
+  if (m_threadInitialised) {
+    pthread_join(m_thread, NULL);
+    m_threadInitialised = false;
+  }
 }
 
 unsigned int AlsaInput::rate(void)
@@ -185,15 +189,6 @@ void AlsaInput::unlock(void)
   pthread_mutex_unlock( &m_mutex );
 }
 
-void AlsaInput::prepare(void) throw (Error)
-{
-  ERRORMACRO( m_pcmHandle != NULL, Error, , "PCM device \"" << m_pcmName
-              << "\" is not open. Did you call \"close\" before?" );
-  int err = snd_pcm_prepare( m_pcmHandle );
-  ERRORMACRO( err >= 0, Error, , "Error preparing PCM device \"" << m_pcmName
-              << "\": " << snd_strerror( err ) );
-}
-
 void AlsaInput::threadFunc(void)
 {
   bool quit = false;
@@ -247,7 +242,7 @@ VALUE AlsaInput::registerRubyClass( VALUE rbModule )
   rb_define_method( cRubyClass, "rate", RUBY_METHOD_FUNC( wrapRate ), 0 );
   rb_define_method( cRubyClass, "channels", RUBY_METHOD_FUNC( wrapChannels ), 0 );
   rb_define_method( cRubyClass, "avail", RUBY_METHOD_FUNC( wrapAvail ), 0 );
-  rb_define_method( cRubyClass, "prepare", RUBY_METHOD_FUNC( wrapPrepare ), 0 );
+  rb_define_method( cRubyClass, "drop", RUBY_METHOD_FUNC( wrapDrop ), 0 );
 }
 
 void AlsaInput::deleteRubyObject( void *ptr )
@@ -315,11 +310,11 @@ VALUE AlsaInput::wrapAvail( VALUE rbSelf )
   return rbRetVal;
 }
 
-VALUE AlsaInput::wrapPrepare( VALUE rbSelf )
+VALUE AlsaInput::wrapDrop( VALUE rbSelf )
 {
   try {
     AlsaInputPtr *self; Data_Get_Struct( rbSelf, AlsaInputPtr, self );
-    (*self)->prepare();
+    (*self)->drop();
   } catch ( exception &e ) {
     rb_raise( rb_eRuntimeError, "%s", e.what() );
   };

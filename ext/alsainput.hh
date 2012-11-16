@@ -47,7 +47,7 @@ public:
   static VALUE wrapRate( VALUE rbSelf );
   static VALUE wrapChannels( VALUE rbSelf );
   static VALUE wrapAvail( VALUE rbSelf );
-  static VALUE wrapPrepare( VALUE rbSelf );
+  static VALUE wrapDrop( VALUE rbSelf );
 protected:
   void readi(short int *data, int count);
   void threadFunc(void);
