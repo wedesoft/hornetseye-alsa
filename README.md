@@ -15,7 +15,7 @@ Installation
 
 *hornetseye-alsa* requires the ALSA library. If you are running Debian or (K)ubuntu, you can install it like this:
 
-    $ sudo aptitude install libasound2-dev
+    $ sudo aptitude install libasound2-dev libboost-dev libboost-dev
 
 To install this Ruby extension, use the following command:
 
