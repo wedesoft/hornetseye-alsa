@@ -7,7 +7,7 @@ require 'rake/loaders/makefile'
 require 'rbconfig'
 
 PKG_NAME = 'hornetseye-alsa'
-PKG_VERSION = '1.3.0'
+PKG_VERSION = '1.3.1'
 CFG = RbConfig::CONFIG
 CXX = ENV[ 'CXX' ] || 'g++'
 RB_FILES = FileList[ 'lib/**/*.rb' ]
@@ -22,6 +22,7 @@ BIN_FILES = [ 'README.md', 'COPYING', '.document', SO_FILE ] +
             RB_FILES + TS_FILES + TC_FILES
 SUMMARY = %q{Play audio data using libalsa}
 DESCRIPTION = %q{This Ruby extension provides an interface for playing audio data using ALSA.}
+LICENSE = 'GPL-3+'
 AUTHOR = %q{Jan Wedekind}
 EMAIL = %q{jan@wedesoft.de}
 HOMEPAGE = %q{http://wedesoft.github.com/hornetseye-alsa/}
@@ -102,6 +103,7 @@ begin
     s.date = Date.today.to_s
     s.summary = SUMMARY
     s.description = DESCRIPTION
+    s.license = LICENSE
     s.author = AUTHOR
     s.email = EMAIL
     s.homepage = HOMEPAGE
@@ -125,6 +127,7 @@ begin
     s.date = Date.today.to_s
     s.summary = SUMMARY
     s.description = DESCRIPTION
+    s.license = LICENSE
     s.author = AUTHOR
     s.email = EMAIL
     s.homepage = HOMEPAGE
